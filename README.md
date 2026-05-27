@@ -151,11 +151,7 @@ curl -X POST https://api.deepguard.ai/detect \
 | 💻 GitHub | [github.com/your-team/deepguard](https://github.com/your-team/deepguard) |
 | 📧 Contact | team@deepguard.ai |
 
----
 
-## 📄 License
-
-This project is licensed under the MIT License. See [`LICENSE`](./LICENSE) for details.
 
 ---
 
