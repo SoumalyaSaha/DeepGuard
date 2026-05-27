@@ -147,7 +147,7 @@ curl -X POST https://api.deepguard.ai/detect \
 
 | | |
 |---|---|
-| 🌐 Live Demo | file:///C:/Users/soumalyasaha/Downloads/DeepGuard_Prototype.html |
+| 🌐 Live Demo |  |
 | 💻 GitHub | [github.com/your-team/deepguard](https://github.com/your-team/deepguard) |
 | 📧 Contact | team@deepguard.ai |
 
