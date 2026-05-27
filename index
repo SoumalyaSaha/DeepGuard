@@ -1,986 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DeepGuard — AI Deepfake Detection</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DeepGuard — Conceptual AI Deepfake Detection Interface</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-  :root {
-    --bg: #080b10;
-    --bg2: #0e1219;
-    --bg3: #141820;
-    --border: rgba(255,255,255,0.07);
-    --border2: rgba(255,255,255,0.12);
-    --text: #e8eaf0;
-    --muted: #7a8090;
-    --accent: #00e5b0;
-    --accent2: #0099ff;
-    --danger: #ff4757;
-    --warn: #ffa502;
-    --safe: #2ed573;
-    --font-head: 'Syne', sans-serif;
-    --font-body: 'IBM Plex Sans', sans-serif;
-    --font-mono: 'IBM Plex Mono', monospace;
-  }
+:root {
+  --bg: #080b10;
+  --bg2: #0e1219;
+  --bg3: #141820;
 
-  body {
-    font-family: var(--font-body);
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
 
-  /* Scanline texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,229,176,0.012) 2px, rgba(0,229,176,0.012) 4px);
-    pointer-events: none;
-    z-index: 0;
-  }
+  --text: #e8eaf0;
+  --muted: #7a8090;
 
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 2.5rem; height: 60px;
-    background: rgba(8,11,16,0.85);
-    backdrop-filter: blur(16px);
-    border-bottom: 0.5px solid var(--border);
-  }
-  .logo {
-    font-family: var(--font-head);
-    font-size: 1.2rem; font-weight: 800; letter-spacing: -0.03em;
-    display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text);
-  }
-  .logo-icon {
-    width: 28px; height: 28px; border-radius: 6px;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 800; color: #080b10;
-  }
-  .nav-badge {
-    font-family: var(--font-mono);
-    font-size: 10px; color: var(--accent);
-    border: 0.5px solid var(--accent);
-    padding: 2px 8px; border-radius: 20px; letter-spacing: 0.05em;
-  }
-  .nav-right { display: flex; align-items: center; gap: 1.5rem; }
-  .nav-link {
-    font-size: 13px; color: var(--muted); text-decoration: none;
-    transition: color 0.2s;
-  }
-  .nav-link:hover { color: var(--text); }
+  --accent: #00e5b0;
+  --accent2: #0099ff;
 
-  /* HERO */
-  .hero {
-    position: relative;
-    text-align: center;
-    padding: 5rem 2rem 3rem;
-    overflow: hidden;
-  }
-  .hero-glow {
-    position: absolute;
-    top: -60px; left: 50%; transform: translateX(-50%);
-    width: 600px; height: 300px;
-    background: radial-gradient(ellipse at center, rgba(0,229,176,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .hero-tag {
-    display: inline-block;
-    font-family: var(--font-mono);
-    font-size: 11px; color: var(--accent);
-    border: 0.5px solid rgba(0,229,176,0.3);
-    padding: 4px 12px; border-radius: 20px;
-    margin-bottom: 1.5rem; letter-spacing: 0.08em;
-    background: rgba(0,229,176,0.05);
-  }
-  h1 {
-    font-family: var(--font-head);
-    font-size: clamp(2.5rem, 6vw, 4.5rem);
-    font-weight: 800; line-height: 1.0;
-    letter-spacing: -0.04em;
-    color: #fff;
-    margin-bottom: 1.2rem;
-  }
-  h1 span { color: var(--accent); }
-  .hero-sub {
-    font-size: 1rem; color: var(--muted); max-width: 480px; margin: 0 auto 2.5rem;
-    line-height: 1.6; font-weight: 300;
-  }
+  --danger: #ff4757;
+  --warn: #ffa502;
+  --safe: #2ed573;
 
-  /* STATS ROW */
-  .stats-row {
-    display: flex; justify-content: center; gap: 3rem;
-    padding: 1.5rem 0 2rem;
-    border-top: 0.5px solid var(--border);
-    border-bottom: 0.5px solid var(--border);
-    margin: 0 2.5rem 3rem;
-  }
-  .stat { text-align: center; }
-  .stat-n {
-    font-family: var(--font-head);
-    font-size: 1.6rem; font-weight: 800; color: #fff;
-  }
-  .stat-n span { color: var(--accent); }
-  .stat-l {
-    font-size: 11px; color: var(--muted);
-    font-family: var(--font-mono); letter-spacing: 0.06em;
-    text-transform: uppercase; margin-top: 2px;
-  }
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
 
-  /* MAIN LAYOUT */
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,176,0.012) 2px,
+      rgba(0,229,176,0.012) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* NAV */
+
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 60px;
+  padding: 0 2rem;
+
+  background: rgba(8,11,16,0.88);
+  backdrop-filter: blur(14px);
+
+  border-bottom: 0.5px solid var(--border);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: var(--text);
+  text-decoration: none;
+
+  font-family: var(--font-head);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.logo-icon {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 6px;
+
+  background: var(--accent);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #080b10;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.nav-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+
+  color: var(--accent);
+
+  border: 0.5px solid rgba(0,229,176,0.35);
+
+  padding: 3px 10px;
+  border-radius: 20px;
+
+  letter-spacing: 0.05em;
+
+  background: rgba(0,229,176,0.06);
+}
+
+.nav-right {
+  display: flex;
+  gap: 1.4rem;
+}
+
+.nav-link {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: color .2s;
+}
+
+.nav-link:hover {
+  color: var(--text);
+}
+
+/* HERO */
+
+.hero {
+  position: relative;
+  text-align: center;
+  padding: 5rem 2rem 3rem;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 650px;
+  height: 320px;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(0,229,176,0.08) 0%,
+      transparent 70%
+    );
+
+  pointer-events: none;
+}
+
+.hero-tag {
+  display: inline-block;
+
+  margin-bottom: 1.4rem;
+
+  padding: 4px 12px;
+
+  border-radius: 20px;
+
+  border: 0.5px solid rgba(0,229,176,0.28);
+
+  background: rgba(0,229,176,0.05);
+
+  color: var(--accent);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+}
+
+h1 {
+  font-family: var(--font-head);
+  font-size: clamp(2.7rem, 6vw, 4.6rem);
+  font-weight: 800;
+  line-height: 1;
+
+  letter-spacing: -0.04em;
+
+  margin-bottom: 1rem;
+
+  color: white;
+}
+
+h1 span {
+  color: var(--accent);
+}
+
+.hero-sub {
+  max-width: 600px;
+  margin: 0 auto 1.6rem;
+
+  color: var(--muted);
+
+  line-height: 1.7;
+  font-size: 1rem;
+  font-weight: 300;
+}
+
+.concept-note {
+  max-width: 760px;
+
+  margin: 0 auto;
+
+  padding: 14px 18px;
+
+  border: 0.5px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+
+  background: rgba(255,255,255,0.03);
+
+  color: #9aa3b2;
+
+  line-height: 1.7;
+  font-size: 13px;
+  font-weight: 300;
+
+  backdrop-filter: blur(8px);
+}
+
+/* STATS */
+
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+
+  padding: 1.6rem 0 2rem;
+
+  margin: 0 2rem 3rem;
+
+  border-top: 0.5px solid var(--border);
+  border-bottom: 0.5px solid var(--border);
+
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-n {
+  font-family: var(--font-head);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.stat-n span {
+  color: var(--accent);
+}
+
+.stat-l {
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+/* MAIN */
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 4rem;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* PANEL */
+
+.panel {
+  background: var(--bg2);
+
+  border: 0.5px solid var(--border);
+
+  border-radius: 12px;
+
+  overflow: hidden;
+}
+
+.panel-full {
+  grid-column: 1 / -1;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 1rem 1.2rem .8rem;
+
+  border-bottom: 0.5px solid var(--border);
+}
+
+.panel-icon {
+  width: 28px;
+  height: 28px;
+
+  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+}
+
+.pi-teal {
+  background: rgba(0,229,176,0.12);
+  color: var(--accent);
+}
+
+.pi-blue {
+  background: rgba(0,153,255,0.12);
+  color: var(--accent2);
+}
+
+.pi-red {
+  background: rgba(255,71,87,0.12);
+  color: var(--danger);
+}
+
+.panel-title {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.panel-subtitle {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.panel-body {
+  padding: 1.25rem;
+}
+
+/* PLACEHOLDER */
+
+.placeholder-msg {
+  text-align: center;
+  padding: 2rem 1rem;
+
+  color: var(--muted);
+
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+
+.placeholder-msg .big {
+  font-size: 2rem;
+  opacity: 0.3;
+  margin-bottom: .6rem;
+}
+
+/* UPLOAD */
+
+.upload-zone {
+  border: 1.5px dashed var(--border2);
+  border-radius: 10px;
+
+  padding: 2.5rem 1rem;
+
+  text-align: center;
+
+  transition: .2s;
+
+  cursor: pointer;
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: rgba(0,229,176,0.04);
+}
+
+.upload-title {
+  color: white;
+  margin-bottom: 5px;
+  font-size: 15px;
+}
+
+.upload-hint {
+  color: var(--muted);
+  font-size: 12px;
+  font-family: var(--font-mono);
+}
+
+.upload-icon {
+  font-size: 2rem;
+  margin-bottom: .8rem;
+}
+
+/* TABS */
+
+.type-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.type-tab {
+  flex: 1;
+
+  border: 0.5px solid var(--border);
+
+  border-radius: 7px;
+
+  padding: 7px 0;
+
+  background: transparent;
+
+  color: var(--muted);
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition: .2s;
+}
+
+.type-tab.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(0,229,176,0.08);
+}
+
+/* BUTTON */
+
+.analyze-btn {
+  width: 100%;
+  margin-top: 1rem;
+
+  border: none;
+  border-radius: 8px;
+
+  padding: 13px;
+
+  background: var(--accent);
+
+  color: #080b10;
+
+  font-family: var(--font-head);
+  font-weight: 700;
+  font-size: 14px;
+
+  cursor: pointer;
+
+  transition: opacity .2s;
+}
+
+.analyze-btn:hover {
+  opacity: .9;
+}
+
+/* TERMINAL */
+
+.terminal {
+  margin-top: .5rem;
+
+  background: #04060a;
+
+  border: 0.5px solid var(--border);
+
+  border-radius: 8px;
+
+  padding: 1rem;
+
+  max-height: 150px;
+  overflow-y: auto;
+
+  line-height: 1.7;
+
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+}
+
+.log-line {
+  display: block;
+}
+
+.log-ts {
+  color: var(--muted);
+}
+
+.log-info {
+  color: var(--accent2);
+}
+
+.log-ok {
+  color: var(--accent);
+}
+
+/* RESULT */
+
+.result-wrap {
+  text-align: center;
+}
+
+.result-score {
+  font-family: var(--font-head);
+  font-size: 4rem;
+  font-weight: 800;
+
+  margin-bottom: .4rem;
+}
+
+.result-label {
+  display: inline-block;
+
+  border-radius: 20px;
+
+  padding: 6px 14px;
+
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.fake {
+  color: var(--danger);
+  background: rgba(255,71,87,0.12);
+}
+
+.real {
+  color: var(--safe);
+  background: rgba(46,213,115,0.12);
+}
+
+.warn {
+  color: var(--warn);
+  background: rgba(255,165,2,0.12);
+}
+
+/* FOOTER */
+
+footer {
+  border-top: 0.5px solid rgba(255,255,255,0.06);
+
+  padding: 18px 24px;
+
+  text-align: center;
+
+  color: #6f7787;
+
+  font-size: 12px;
+
+  font-family: var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 760px) {
   .main {
-    max-width: 1100px; margin: 0 auto; padding: 0 2rem 4rem;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+    grid-template-columns: 1fr;
   }
 
-  /* PANELS */
-  .panel {
-    background: var(--bg2);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+  .panel-full {
+    grid-column: 1;
   }
-  .panel-header {
-    padding: 1rem 1.25rem 0.75rem;
-    border-bottom: 0.5px solid var(--border);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .panel-icon {
-    width: 28px; height: 28px; border-radius: 6px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-  }
-  .pi-teal { background: rgba(0,229,176,0.12); color: var(--accent); }
-  .pi-blue { background: rgba(0,153,255,0.12); color: var(--accent2); }
-  .pi-red  { background: rgba(255,71,87,0.12); color: var(--danger); }
-  .panel-title {
-    font-family: var(--font-head);
-    font-size: 14px; font-weight: 700; color: #fff;
-    letter-spacing: -0.01em;
-  }
-  .panel-subtitle { font-size: 11px; color: var(--muted); }
-  .panel-body { padding: 1.25rem; }
-
-  /* UPLOAD ZONE */
-  .upload-zone {
-    border: 1.5px dashed var(--border2);
-    border-radius: 10px;
-    padding: 2.5rem 1rem;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: var(--accent);
-    background: rgba(0,229,176,0.04);
-  }
-  .upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-  .upload-icon { font-size: 2rem; margin-bottom: 0.75rem; }
-  .upload-title { font-size: 15px; font-weight: 500; color: #fff; margin-bottom: 4px; }
-  .upload-hint { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-
-  /* MEDIA TYPE TABS */
-  .type-tabs {
-    display: flex; gap: 6px; margin-bottom: 1rem;
-  }
-  .type-tab {
-    flex: 1; padding: 7px 0;
-    border: 0.5px solid var(--border);
-    border-radius: 7px;
-    background: transparent;
-    color: var(--muted); font-size: 12px;
-    font-family: var(--font-mono); letter-spacing: 0.04em;
-    cursor: pointer; transition: all 0.2s;
-  }
-  .type-tab.active {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(0,229,176,0.08);
-  }
-
-  /* ANALYZE BUTTON */
-  .analyze-btn {
-    width: 100%; padding: 13px;
-    border: none;
-    background: var(--accent);
-    color: #080b10;
-    font-family: var(--font-head);
-    font-size: 14px; font-weight: 700;
-    border-radius: 8px; cursor: pointer;
-    letter-spacing: 0.03em;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 1rem;
-  }
-  .analyze-btn:hover { opacity: 0.9; }
-  .analyze-btn:active { transform: scale(0.99); }
-  .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  /* SCORE DISPLAY */
-  .score-display { text-align: center; padding: 1.5rem 0 1rem; }
-  .score-ring-wrap {
-    position: relative; width: 120px; height: 120px;
-    margin: 0 auto 1rem;
-  }
-  .score-ring-wrap svg { transform: rotate(-90deg); }
-  .score-number {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-  }
-  .score-n {
-    font-family: var(--font-head);
-    font-size: 2rem; font-weight: 800; color: #fff;
-  }
-  .score-pct { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-  .verdict-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 12px; font-weight: 500;
-    padding: 5px 14px; border-radius: 20px;
-    letter-spacing: 0.06em;
-  }
-  .verdict-fake { background: rgba(255,71,87,0.15); color: var(--danger); border: 0.5px solid rgba(255,71,87,0.3); }
-  .verdict-real { background: rgba(46,213,115,0.15); color: var(--safe); border: 0.5px solid rgba(46,213,115,0.3); }
-  .verdict-sus  { background: rgba(255,165,2,0.15); color: var(--warn); border: 0.5px solid rgba(255,165,2,0.3); }
-
-  /* BREAKDOWN BARS */
-  .breakdown { margin-top: 1.2rem; }
-  .breakdown-row { margin-bottom: 12px; }
-  .breakdown-label {
-    display: flex; justify-content: space-between;
-    font-size: 12px; margin-bottom: 5px;
-  }
-  .breakdown-label span:first-child { color: var(--muted); font-family: var(--font-mono); }
-  .breakdown-label span:last-child { color: #fff; font-weight: 500; }
-  .bar-track {
-    height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden;
-  }
-  .bar-fill {
-    height: 100%; border-radius: 3px;
-    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
-    width: 0%;
-  }
-  .bar-danger { background: var(--danger); }
-  .bar-warn   { background: var(--warn); }
-  .bar-safe   { background: var(--safe); }
-  .bar-accent { background: var(--accent); }
-
-  /* HEATMAP PANEL */
-  .heatmap-canvas {
-    width: 100%; border-radius: 8px;
-    background: var(--bg3);
-    overflow: hidden; position: relative;
-  }
-  #heatmap-canvas { width: 100%; display: block; }
-  .heatmap-legend {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 10px; font-size: 11px; color: var(--muted);
-    font-family: var(--font-mono);
-  }
-  .legend-grad {
-    flex: 1; height: 6px; border-radius: 3px;
-    background: linear-gradient(to right, rgba(0,229,176,0.3), #ffa502, #ff4757);
-  }
-
-  /* DETAILS PANEL — full width */
-  .panel-full { grid-column: 1 / -1; }
-
-  /* SIGNAL TABLE */
-  .signal-table { width: 100%; border-collapse: collapse; }
-  .signal-table th {
-    text-align: left; font-size: 11px; color: var(--muted);
-    font-family: var(--font-mono); letter-spacing: 0.06em;
-    padding: 0 0 10px; border-bottom: 0.5px solid var(--border);
-    font-weight: 400;
-  }
-  .signal-table td {
-    padding: 10px 0; border-bottom: 0.5px solid var(--border);
-    font-size: 13px; vertical-align: middle;
-  }
-  .signal-table tr:last-child td { border-bottom: none; }
-  .signal-name { color: #fff; font-weight: 500; }
-  .signal-desc { color: var(--muted); font-size: 12px; margin-top: 2px; }
-  .signal-conf {
-    font-family: var(--font-mono); font-size: 12px; text-align: right;
-  }
-  .conf-high { color: var(--danger); }
-  .conf-med  { color: var(--warn); }
-  .conf-low  { color: var(--safe); }
-
-  .dot {
-    display: inline-block; width: 7px; height: 7px;
-    border-radius: 50%; margin-right: 6px; vertical-align: middle;
-  }
-  .dot-red    { background: var(--danger); }
-  .dot-yellow { background: var(--warn); }
-  .dot-green  { background: var(--safe); }
-
-  /* LOADING STATE */
-  .loading-overlay {
-    position: absolute; inset: 0;
-    background: rgba(8,11,16,0.85);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 16px; border-radius: 12px;
-    opacity: 0; pointer-events: none;
-    transition: opacity 0.3s; z-index: 10;
-  }
-  .loading-overlay.active { opacity: 1; pointer-events: all; }
-  .loading-bar {
-    width: 200px; height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden;
-  }
-  .loading-fill {
-    height: 100%; background: var(--accent); border-radius: 2px;
-    animation: loadpulse 1.5s ease-in-out infinite;
-  }
-  @keyframes loadpulse {
-    0% { width: 0%; margin-left: 0; }
-    50% { width: 70%; margin-left: 0; }
-    100% { width: 0%; margin-left: 100%; }
-  }
-  .loading-text { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
-
-  /* PLACEHOLDER STATE */
-  .placeholder-msg {
-    text-align: center; padding: 3rem 1rem;
-    color: var(--muted); font-size: 13px;
-    font-family: var(--font-mono);
-  }
-  .placeholder-msg .big { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3; }
-
-  /* TERMINAL LOG */
-  .terminal {
-    background: #04060a;
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem;
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    max-height: 140px; overflow-y: auto;
-    line-height: 1.7;
-  }
-  .log-line { display: block; }
-  .log-ts { color: var(--muted); }
-  .log-ok  { color: var(--accent); }
-  .log-err { color: var(--danger); }
-  .log-warn { color: var(--warn); }
-  .log-info { color: var(--accent2); }
-
-  /* RESPONSIVE */
-  @media (max-width: 700px) {
-    .main { grid-template-columns: 1fr; }
-    .panel-full { grid-column: 1; }
-    .stats-row { gap: 1.5rem; flex-wrap: wrap; }
-  }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-  /* FADE IN */
-  .fade-in { animation: fadein 0.5s ease both; }
-  @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-
-  /* FILE PREVIEW */
-  .file-preview {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px;
-    background: var(--bg3); border-radius: 8px;
-    margin-bottom: 10px;
-  }
-  .file-preview-icon { font-size: 20px; }
-  .file-preview-name { font-size: 13px; color: #fff; font-weight: 500; }
-  .file-preview-size { font-size: 11px; color: var(--muted); font-family: var(--font-mono); }
-  .file-preview-rm {
-    margin-left: auto; background: none; border: none;
-    color: var(--muted); cursor: pointer; font-size: 16px;
-    transition: color 0.2s;
-  }
-  .file-preview-rm:hover { color: var(--danger); }
-
-  .model-badge {
-    font-family: var(--font-mono); font-size: 10px;
-    padding: 2px 7px; border-radius: 4px;
-    background: rgba(0,153,255,0.12); color: var(--accent2);
-    margin-left: auto;
-  }
-
-  /* DOWNLOAD BTN */
-  .dl-btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border-radius: 7px;
-    background: rgba(0,229,176,0.1);
-    border: 0.5px solid rgba(0,229,176,0.3);
-    color: var(--accent); font-size: 12px;
-    font-family: var(--font-mono); text-decoration: none;
-    transition: background 0.2s;
-    cursor: pointer;
-  }
-  .dl-btn:hover { background: rgba(0,229,176,0.18); }
+}
 </style>
 </head>
+
 <body>
 
 <nav>
-  <a class="logo" href="#">
+  <a href="#" class="logo">
     <div class="logo-icon">DG</div>
     DeepGuard
   </a>
-  <span class="nav-badge">▶ LIVE PROTOTYPE</span>
+
+  <span class="nav-badge">◆ CONCEPT EXPERIENCE</span>
+
   <div class="nav-right">
-    <a class="nav-link" href="#">Docs</a>
-    <a class="nav-link" href="#">API</a>
-    <a class="nav-link" href="#">About</a>
+    <a href="#" class="nav-link">Overview</a>
+    <a href="#" class="nav-link">Research</a>
+    <a href="#" class="nav-link">Concept</a>
   </div>
 </nav>
 
 <div class="hero">
+
   <div class="hero-glow"></div>
-  <div class="hero-tag">IdeaTeX Heritage Hackathon · May 2026</div>
-  <h1>Detect <span>deepfakes</span><br>in every pixel.</h1>
-  <p class="hero-sub">Multi-modal AI forensics for video, audio & images — with explainable heatmaps and real-time confidence scoring.</p>
+
+  <div class="hero-tag">
+    Speculative AI Forensics Interface · Concept Demonstration
+  </div>
+
+  <h1>
+    Detect <span>deepfakes</span><br>
+    in every pixel.
+  </h1>
+
+  <p class="hero-sub">
+    A conceptual interface exploring explainable multi-modal AI forensics
+    for synthetic media analysis across image, video, and audio systems.
+  </p>
+
+  <div class="concept-note">
+    DeepGuard is a speculative interface concept created for demonstration and design exploration purposes.
+    The current experience simulates AI-assisted forensic workflows, confidence scoring,
+    and visualization systems to illustrate a possible future implementation of
+    multi-modal deepfake analysis technology. It is not connected to a live detection backend
+    and should not be interpreted as a functional forensic verification platform.
+  </div>
+
 </div>
 
 <div class="stats-row">
-  <div class="stat"><div class="stat-n"><span>96.3</span>%</div><div class="stat-l">Image Accuracy</div></div>
-  <div class="stat"><div class="stat-n"><span>94.1</span>%</div><div class="stat-l">Video Accuracy</div></div>
-  <div class="stat"><div class="stat-n"><span>91.7</span>%</div><div class="stat-l">Audio Accuracy</div></div>
-  <div class="stat"><div class="stat-n">&lt;<span>2</span>s</div><div class="stat-l">Avg. Latency</div></div>
+
+  <div class="stat">
+    <div class="stat-n"><span>96.3</span>%</div>
+    <div class="stat-l">Image Accuracy</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-n"><span>94.1</span>%</div>
+    <div class="stat-l">Video Accuracy</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-n"><span>91.7</span>%</div>
+    <div class="stat-l">Audio Accuracy</div>
+  </div>
+
+  <div class="stat">
+    <div class="stat-n">&lt;<span>2</span>s</div>
+    <div class="stat-l">Avg. Latency</div>
+  </div>
+
 </div>
 
 <div class="main">
 
-  <!-- UPLOAD PANEL -->
-  <div class="panel" style="position:relative;">
-    <div class="loading-overlay" id="loading-overlay">
-      <div class="loading-text" id="loading-text">Initializing pipeline…</div>
-      <div class="loading-bar"><div class="loading-fill"></div></div>
-    </div>
+  <!-- LEFT -->
+
+  <div class="panel">
+
     <div class="panel-header">
       <div class="panel-icon pi-teal">⬆</div>
+
       <div>
         <div class="panel-title">Upload Media</div>
-        <div class="panel-subtitle">Video · Audio · Image</div>
+        <div class="panel-subtitle">Image · Video · Audio</div>
       </div>
     </div>
+
     <div class="panel-body">
+
       <div class="type-tabs">
-        <button class="type-tab active" data-type="image">🖼 Image</button>
-        <button class="type-tab" data-type="video">🎥 Video</button>
-        <button class="type-tab" data-type="audio">🎵 Audio</button>
+        <button class="type-tab active">🖼 Image</button>
+        <button class="type-tab">🎥 Video</button>
+        <button class="type-tab">🎵 Audio</button>
       </div>
 
-      <div id="file-preview-area" style="display:none;">
-        <div class="file-preview">
-          <span class="file-preview-icon" id="preview-icon">🖼</span>
-          <div>
-            <div class="file-preview-name" id="preview-name">file.jpg</div>
-            <div class="file-preview-size" id="preview-size">—</div>
-          </div>
-          <button class="file-preview-rm" id="remove-file" title="Remove">✕</button>
-        </div>
-      </div>
-
-      <div class="upload-zone" id="upload-zone">
-        <input type="file" id="file-input" accept="image/*,video/*,audio/*">
+      <div class="upload-zone">
         <div class="upload-icon">📂</div>
-        <div class="upload-title">Drop file here or click to browse</div>
-        <div class="upload-hint" id="upload-hint">Supports .jpg .png .webp · max 20MB</div>
-      </div>
 
-      <div style="margin-top: 1rem;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
-          <span style="font-size:12px; color:var(--muted); font-family:var(--font-mono);">SENSITIVITY</span>
-          <span style="font-size:12px; color:#fff; font-family:var(--font-mono);" id="sens-val">HIGH</span>
+        <div class="upload-title">
+          Drop file here or click to browse
         </div>
-        <input type="range" id="sensitivity" min="1" max="3" value="3" style="width:100%;">
+
+        <div class="upload-hint">
+          Simulated upload interface · no real analysis performed
+        </div>
       </div>
 
-      <button class="analyze-btn" id="analyze-btn" disabled>▶ RUN ANALYSIS</button>
+      <button class="analyze-btn" id="analyze-btn">
+        ▶ RUN CONCEPTUAL ANALYSIS
+      </button>
 
       <div style="margin-top:1rem;">
-        <div style="font-size:11px; color:var(--muted); font-family:var(--font-mono); margin-bottom:6px;">ANALYSIS LOG</div>
+        <div style="
+          margin-bottom:6px;
+          color:var(--muted);
+          font-size:11px;
+          font-family:var(--font-mono);
+        ">
+          SYSTEM LOG
+        </div>
+
         <div class="terminal" id="terminal">
-          <span class="log-line"><span class="log-ts">[00:00]</span> <span class="log-info">DeepGuard v2.1.0 ready</span></span>
-          <span class="log-line"><span class="log-ts">[00:00]</span> <span class="log-ok">Models loaded · EfficientNet-B4, TimeSformer, Wav2Vec2</span></span>
-          <span class="log-line"><span class="log-ts">[00:00]</span> <span class="log-info">Awaiting input…</span></span>
+          <span class="log-line">
+            <span class="log-ts">[00:00]</span>
+            <span class="log-info">DeepGuard Concept UI initialized</span>
+          </span>
+
+          <span class="log-line">
+            <span class="log-ts">[00:00]</span>
+            <span class="log-ok">Visualization modules loaded</span>
+          </span>
+
+          <span class="log-line">
+            <span class="log-ts">[00:00]</span>
+            <span class="log-info">Awaiting simulated analysis…</span>
+          </span>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- RESULTS PANEL -->
-  <div class="panel" id="results-panel" style="position:relative;">
+  <!-- RIGHT -->
+
+  <div class="panel">
+
     <div class="panel-header">
       <div class="panel-icon pi-red">🔍</div>
+
       <div>
         <div class="panel-title">Detection Results</div>
-        <div class="panel-subtitle">Confidence · Verdict · Breakdown</div>
+        <div class="panel-subtitle">Simulated conceptual output</div>
       </div>
-      <span class="model-badge" id="model-badge">—</span>
     </div>
-    <div class="panel-body" id="results-body">
-      <div class="placeholder-msg">
-        <div class="big">🛡</div>
-        Upload a file and run analysis<br>to see results here.
+
+    <div class="panel-body">
+
+      <div class="result-wrap">
+
+        <div class="result-score" id="score">
+          —
+        </div>
+
+        <div class="result-label warn" id="label">
+          Awaiting simulation
+        </div>
+
       </div>
+
     </div>
   </div>
 
-  <!-- HEATMAP PANEL -->
+  <!-- HEATMAP -->
+
   <div class="panel">
+
     <div class="panel-header">
       <div class="panel-icon pi-blue">🗺</div>
+
       <div>
         <div class="panel-title">Grad-CAM Heatmap</div>
-        <div class="panel-subtitle">Manipulation regions visualized</div>
+        <div class="panel-subtitle">Illustrative visualization</div>
       </div>
     </div>
+
     <div class="panel-body">
-      <div id="heatmap-area">
-        <div class="placeholder-msg" style="padding:2rem 1rem;">
-          <div class="big">📡</div>
-          Heatmap will appear<br>after analysis completes.
-        </div>
+
+      <div class="placeholder-msg">
+        <div class="big">📡</div>
+        Simulated manipulation regions<br>
+        appear after conceptual analysis.
       </div>
+
     </div>
   </div>
 
-  <!-- AI SIGNALS PANEL -->
+  <!-- SIGNALS -->
+
   <div class="panel">
+
     <div class="panel-header">
       <div class="panel-icon pi-teal">⚡</div>
+
       <div>
         <div class="panel-title">Forensic Signals</div>
-        <div class="panel-subtitle">Per-signal anomaly detection</div>
+        <div class="panel-subtitle">Synthetic demonstration metrics</div>
       </div>
     </div>
-    <div class="panel-body" id="signals-body">
-      <div class="placeholder-msg" style="padding:2rem 1rem;">
+
+    <div class="panel-body">
+
+      <div class="placeholder-msg">
         <div class="big">📊</div>
-        Signal breakdown<br>appears after scan.
+        AI-generated signal breakdowns<br>
+        displayed for interface demonstration.
       </div>
+
     </div>
   </div>
 
-  <!-- FULL WIDTH AI EXPLANATION -->
+  <!-- SUMMARY -->
+
   <div class="panel panel-full">
+
     <div class="panel-header">
       <div class="panel-icon pi-blue">🤖</div>
+
       <div>
         <div class="panel-title">AI Forensic Summary</div>
-        <div class="panel-subtitle">Powered by Claude · Explainable findings</div>
+        <div class="panel-subtitle">Narrative simulation layer</div>
       </div>
     </div>
-    <div class="panel-body" id="ai-summary-body">
-      <div class="placeholder-msg" style="padding:1.5rem;">
-        <div class="big" style="font-size:1.5rem;">💬</div>
-        The AI forensic analyst will explain findings<br>after you run an analysis.
+
+    <div class="panel-body">
+
+      <div class="placeholder-msg">
+        <div class="big">💬</div>
+
+        This section demonstrates how an explainable AI forensic
+        assistant might summarize synthetic media findings
+        within a future production system.
       </div>
+
     </div>
   </div>
 
 </div>
 
-<script>
-const $ = id => document.getElementById(id);
-const terminal = $('terminal');
-let currentType = 'image';
-let fileSelected = false;
-let analysisCount = 0;
+<footer>
+  DeepGuard Concept Interface · Simulated analytical outputs ·
+  Non-production demonstration experience
+</footer>
 
-function log(msg, cls='log-info') {
-  const ts = new Date().toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+<script>
+const analyzeBtn = document.getElementById('analyze-btn');
+const terminal = document.getElementById('terminal');
+
+const score = document.getElementById('score');
+const label = document.getElementById('label');
+
+function log(message, cls='log-info') {
   const line = document.createElement('span');
+
   line.className = 'log-line';
-  line.innerHTML = `<span class="log-ts">[${ts}]</span> <span class="${cls}">${msg}</span>`;
+
+  line.innerHTML = `
+    <span class="log-ts">
+      [${new Date().toLocaleTimeString('en-US', {
+        hour:'2-digit',
+        minute:'2-digit',
+        second:'2-digit',
+        hour12:false
+      })}]
+    </span>
+    <span class="${cls}">${message}</span>
+  `;
+
   terminal.appendChild(line);
+
   terminal.scrollTop = terminal.scrollHeight;
 }
 
-// Type tabs
-document.querySelectorAll('.type-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.type-tab').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentType = btn.dataset.type;
-    const hints = { image: 'Supports .jpg .png .webp · max 20MB', video: 'Supports .mp4 .mov · max 100MB', audio: 'Supports .wav .mp3 · max 50MB' };
-    $('upload-hint').textContent = hints[currentType];
-    const accepts = { image: 'image/*', video: 'video/*', audio: 'audio/*' };
-    $('file-input').accept = accepts[currentType];
-  });
-});
+analyzeBtn.addEventListener('click', async () => {
 
-// File input
-$('file-input').addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (f) selectFile(f);
-});
+  log('Initializing conceptual analysis pipeline…');
+  await sleep(700);
 
-// Drag/drop
-const zone = $('upload-zone');
-zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-zone.addEventListener('drop', e => {
-  e.preventDefault(); zone.classList.remove('drag-over');
-  const f = e.dataTransfer.files[0];
-  if (f) selectFile(f);
-});
+  log('Generating simulated tensor outputs…');
+  await sleep(700);
 
-function selectFile(f) {
-  fileSelected = true;
-  const icons = { image: '🖼', video: '🎥', audio: '🎵' };
-  $('preview-icon').textContent = icons[currentType] || '📄';
-  $('preview-name').textContent = f.name;
-  $('preview-size').textContent = (f.size / 1024).toFixed(1) + ' KB';
-  $('file-preview-area').style.display = 'block';
-  $('analyze-btn').disabled = false;
-  log(`File selected: ${f.name}`, 'log-ok');
-  log(`Detected type: ${currentType.toUpperCase()} · size: ${(f.size/1024).toFixed(1)}KB`, 'log-info');
-}
+  log('Synthesizing illustrative forensic signals…');
+  await sleep(700);
 
-$('remove-file').addEventListener('click', () => {
-  fileSelected = false;
-  $('file-preview-area').style.display = 'none';
-  $('file-input').value = '';
-  $('analyze-btn').disabled = true;
-  log('File removed.', 'log-warn');
-});
-
-// Sensitivity
-$('sensitivity').addEventListener('input', e => {
-  const labels = ['', 'LOW', 'MEDIUM', 'HIGH'];
-  $('sens-val').textContent = labels[e.target.value];
-});
-
-// ANALYZE
-$('analyze-btn').addEventListener('click', runAnalysis);
-
-async function runAnalysis() {
-  if (!fileSelected) return;
-  analysisCount++;
-  $('analyze-btn').disabled = true;
-  $('loading-overlay').classList.add('active');
-
-  const steps = [
-    'Preprocessing media…',
-    'Extracting feature tensors…',
-    `Running ${currentType === 'image' ? 'EfficientNet-B4' : currentType === 'video' ? 'TimeSformer' : 'Wav2Vec2'}…`,
-    'Generating Grad-CAM heatmap…',
-    'Computing confidence score…',
-    'Synthesizing forensic report…'
-  ];
-
-  for (let i = 0; i < steps.length; i++) {
-    $('loading-text').textContent = steps[i];
-    log(steps[i], 'log-info');
-    await sleep(600 + Math.random() * 400);
-  }
-
-  const sensitivity = parseInt($('sensitivity').value);
-  const results = generateResults(currentType, sensitivity);
-
-  $('loading-overlay').classList.remove('active');
-  renderResults(results);
-  renderHeatmap(results);
-  renderSignals(results);
-  await fetchAISummary(results);
-  $('analyze-btn').disabled = false;
-  log('Analysis complete.', 'log-ok');
-}
-
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-function generateResults(type, sensitivity) {
   const scenarios = [
-    { score: 87 + Math.floor(Math.random()*8), verdict: 'DEEPFAKE', color: 'danger' },
-    { score: 34 + Math.floor(Math.random()*15), verdict: 'AUTHENTIC', color: 'safe' },
-    { score: 54 + Math.floor(Math.random()*18), verdict: 'SUSPICIOUS', color: 'warn' }
+    {
+      score: 92,
+      label: 'DEEPFAKE DETECTED',
+      class: 'fake'
+    },
+    {
+      score: 61,
+      label: 'SUSPICIOUS PATTERNS',
+      class: 'warn'
+    },
+    {
+      score: 27,
+      label: 'LIKELY AUTHENTIC',
+      class: 'real'
+    }
   ];
-  const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
-  const models = { image: 'EfficientNet-B4', video: 'TimeSformer', audio: 'Wav2Vec2' };
 
-  let signals;
-  if (type === 'image') {
-    signals = [
-      { name: 'GAN Fingerprint', desc: 'Pixel-level GAN generator artifacts', conf: rand(75,97), dir: scenario.color },
-      { name: 'Facial Boundary', desc: 'Edge blending at face-background seam', conf: rand(60,92), dir: scenario.color },
-      { name: 'Compression Noise', desc: 'JPEG quantization inconsistency', conf: rand(40,80), dir: scenario.color },
-      { name: 'Eye Reflection', desc: 'Corneal reflection asymmetry', conf: rand(55,85), dir: scenario.color },
-      { name: 'Texture Coherence', desc: 'Skin pore and texture consistency', conf: rand(30,70), dir: scenario.color },
-    ];
-  } else if (type === 'video') {
-    signals = [
-      { name: 'Temporal Flicker', desc: 'Inter-frame forgery artifacts', conf: rand(70,95), dir: scenario.color },
-      { name: 'Head Pose Warp', desc: 'Unnatural rotation at extreme angles', conf: rand(55,90), dir: scenario.color },
-      { name: 'Lip Sync Drift', desc: 'Audio-visual speech misalignment', conf: rand(40,85), dir: scenario.color },
-      { name: 'Blink Pattern', desc: 'Unnatural eye blink frequency', conf: rand(50,80), dir: scenario.color },
-      { name: 'Lighting Mismatch', desc: 'Inconsistent illumination on face vs scene', conf: rand(35,75), dir: scenario.color },
-    ];
-  } else {
-    signals = [
-      { name: 'Spectral Artifacts', desc: 'TTS generator frequency fingerprints', conf: rand(70,96), dir: scenario.color },
-      { name: 'Prosody Pattern', desc: 'Unnatural pitch and rhythm variation', conf: rand(55,88), dir: scenario.color },
-      { name: 'Breath Detection', desc: 'Missing or synthetic breath sounds', conf: rand(45,80), dir: scenario.color },
-      { name: 'Formant Transition', desc: 'Vowel-to-consonant coarticulation', conf: rand(40,75), dir: scenario.color },
-      { name: 'Background Noise', desc: 'Environmental noise consistency', conf: rand(30,65), dir: scenario.color },
-    ];
-  }
+  const selected =
+    scenarios[Math.floor(Math.random() * scenarios.length)];
 
-  return { ...scenario, model: models[type], type, signals };
-}
+  score.textContent = selected.score + '%';
 
-function rand(a, b) { return a + Math.floor(Math.random() * (b - a)); }
+  label.textContent = selected.label;
 
-function renderResults(r) {
-  const models = { image: 'EfficientNet-B4', video: 'TimeSformer', audio: 'Wav2Vec2' };
-  $('model-badge').textContent = r.model;
+  label.className = 'result-label ' + selected.class;
 
-  const verdictClass = { DEEPFAKE: 'verdict-fake', AUTHENTIC: 'verdict-real', SUSPICIOUS: 'verdict-sus' };
-  const ringColor = { danger: '#ff4757', safe: '#2ed573', warn: '#ffa502' };
-  const circumference = 2 * Math.PI * 48;
-  const offset = circumference - (r.score / 100) * circumference;
+  log('Conceptual analysis complete.', 'log-ok');
+});
 
-  const breakdown = r.signals.map(s => ({
-    label: s.name, val: s.conf,
-    cls: s.conf > 80 ? 'bar-danger' : s.conf > 55 ? 'bar-warn' : 'bar-safe'
-  }));
-
-  $('results-body').innerHTML = `
-    <div class="score-display fade-in">
-      <div class="score-ring-wrap">
-        <svg width="120" height="120" viewBox="0 0 120 120">
-          <circle cx="60" cy="60" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="8"/>
-          <circle cx="60" cy="60" r="48" fill="none" stroke="${ringColor[r.color]}" stroke-width="8"
-            stroke-dasharray="${circumference}" stroke-dashoffset="${offset}"
-            stroke-linecap="round" style="transition: stroke-dashoffset 0.8s ease;"/>
-        </svg>
-        <div class="score-number">
-          <div class="score-n">${r.score}</div>
-          <div class="score-pct">FAKE PROB.</div>
-        </div>
-      </div>
-      <div class="verdict-badge ${verdictClass[r.verdict]}">
-        ${r.verdict === 'DEEPFAKE' ? '⚠ DEEPFAKE DETECTED' : r.verdict === 'AUTHENTIC' ? '✓ AUTHENTIC' : '? SUSPICIOUS'}
-      </div>
-    </div>
-    <div class="breakdown fade-in">
-      ${breakdown.map(b => `
-        <div class="breakdown-row">
-          <div class="breakdown-label">
-            <span>${b.label}</span>
-            <span>${b.val}%</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill ${b.cls}" style="width:${b.val}%"></div>
-          </div>
-        </div>`).join('')}
-    </div>
-  `;
-}
-
-function renderHeatmap(r) {
-  const verdictColor = { danger: [[255,71,87],[255,165,2],[0,229,176]], safe: [[0,229,176],[46,213,115],[0,153,255]], warn: [[255,165,2],[255,71,87],[0,229,176]] };
-  const colors = verdictColor[r.color];
-  const isFake = r.verdict !== 'AUTHENTIC';
-
-  $('heatmap-area').innerHTML = `
-    <div class="heatmap-canvas fade-in">
-      <canvas id="heatmap-canvas" height="220"></canvas>
-    </div>
-    <div class="heatmap-legend">
-      <span>LOW</span><div class="legend-grad" style="flex:1;"></div><span>HIGH</span>
-    </div>
-    <div style="margin-top:8px; font-size:11px; color:var(--muted); font-family:var(--font-mono);">
-      ${isFake ? '⚠ Anomalous regions highlighted · ' + r.signals.length + ' signals detected' : '✓ No significant manipulation regions found'}
-    </div>
-  `;
-
-  const canvas = document.getElementById('heatmap-canvas');
-  canvas.width = canvas.offsetWidth || 400;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = 220;
-
-  // Draw base image simulation (grid of pixels)
-  ctx.fillStyle = '#1a1f28';
-  ctx.fillRect(0, 0, W, H);
-
-  // Draw a faux face silhouette
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  for(let x=0; x<W; x+=20) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0; y<H; y+=20) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Draw heatmap blobs if fake/suspicious
-  if (isFake) {
-    const hotspots = [
-      { cx: W*0.35, cy: H*0.35, r: W*0.15, intensity: 0.85 },
-      { cx: W*0.60, cy: H*0.38, r: W*0.10, intensity: 0.70 },
-      { cx: W*0.50, cy: H*0.62, r: W*0.12, intensity: 0.55 },
-      { cx: W*0.25, cy: H*0.55, r: W*0.08, intensity: 0.40 },
-    ];
-    hotspots.forEach(h => {
-      const grad = ctx.createRadialGradient(h.cx, h.cy, 0, h.cx, h.cy, h.r);
-      const [r1,g1,b1] = colors[2];
-      const [r2,g2,b2] = colors[1];
-      const [r3,g3,b3] = colors[0];
-      grad.addColorStop(0, `rgba(${r3},${g3},${b3},${h.intensity})`);
-      grad.addColorStop(0.4, `rgba(${r2},${g2},${b2},${h.intensity*0.7})`);
-      grad.addColorStop(1, `rgba(${r1},${g1},${b1},0)`);
-      ctx.fillStyle = grad;
-      ctx.beginPath(); ctx.arc(h.cx, h.cy, h.r, 0, Math.PI*2); ctx.fill();
-    });
-  } else {
-    ctx.fillStyle = 'rgba(46,213,115,0.06)';
-    ctx.fillRect(0,0,W,H);
-    ctx.fillStyle = 'rgba(46,213,115,0.7)';
-    ctx.font = '13px IBM Plex Mono, monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('✓ No manipulation regions detected', W/2, H/2);
-  }
-
-  // Corner overlay text
-  ctx.fillStyle = 'rgba(0,229,176,0.7)';
-  ctx.font = '10px IBM Plex Mono, monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText('GRAD-CAM OUTPUT', 10, 16);
-  ctx.textAlign = 'right';
-  ctx.fillText(r.model, W-10, 16);
-}
-
-function renderSignals(r) {
-  const confClass = c => c > 80 ? 'conf-high' : c > 55 ? 'conf-med' : 'conf-low';
-  const dotClass  = c => c > 80 ? 'dot-red'  : c > 55 ? 'dot-yellow' : 'dot-green';
-
-  $('signals-body').innerHTML = `
-    <table class="signal-table fade-in">
-      <thead>
-        <tr>
-          <th>SIGNAL</th>
-          <th style="text-align:right;">ANOMALY CONF.</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${r.signals.map(s => `
-          <tr>
-            <td>
-              <div class="signal-name"><span class="dot ${dotClass(s.conf)}"></span>${s.name}</div>
-              <div class="signal-desc">${s.desc}</div>
-            </td>
-            <td class="signal-conf ${confClass(s.conf)}">${s.conf}%</td>
-          </tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-async function fetchAISummary(r) {
-  $('ai-summary-body').innerHTML = `
-    <div style="display:flex;align-items:center;gap:10px;padding:1rem;color:var(--muted);font-family:var(--font-mono);font-size:12px;">
-      <div class="loading-bar" style="width:120px;"><div class="loading-fill"></div></div>
-      Generating forensic analysis…
-    </div>`;
-
-  const topSignals = r.signals.sort((a,b)=>b.conf-a.conf).slice(0,3).map(s=>`${s.name} (${s.conf}%)`).join(', ');
-
-  const prompt = `You are DeepGuard's forensic AI analyst. A ${r.type} file was analyzed with the following results:
-- Verdict: ${r.verdict}
-- Deepfake Probability Score: ${r.score}%
-- Top anomaly signals: ${topSignals}
-- Detection model: ${r.model}
-
-Write a concise forensic summary in 3-4 sentences. Be specific about what was detected and why. Use technical but clear language. Do not use bullet points. Start directly with findings.`;
-
-  try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 1000,
-        messages: [{ role: "user", content: prompt }]
-      })
-    });
-
-    const data = await response.json();
-    const text = data.content?.map(c => c.text || '').join('') || 'Analysis unavailable.';
-
-    const verdictColor = { DEEPFAKE: '#ff4757', AUTHENTIC: '#2ed573', SUSPICIOUS: '#ffa502' };
-    $('ai-summary-body').innerHTML = `
-      <div class="fade-in" style="display:flex;gap:16px;align-items:flex-start;">
-        <div style="width:40px;height:40px;border-radius:10px;background:rgba(0,153,255,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">🤖</div>
-        <div>
-          <div style="font-size:11px;font-family:var(--font-mono);color:var(--muted);margin-bottom:6px;">
-            FORENSIC AI ANALYST · ${r.model} · 
-            <span style="color:${verdictColor[r.verdict]};">${r.verdict}</span> · ${r.score}% confidence
-          </div>
-          <div style="font-size:14px;line-height:1.7;color:var(--text);">${text}</div>
-          <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="dl-btn" onclick="downloadReport(${JSON.stringify(r).replace(/'/g,"\\'")})" style="font-size:11px;">
-              ⬇ Download Report
-            </button>
-            <button class="dl-btn" onclick="copyReport()" style="font-size:11px;">
-              📋 Copy Summary
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-    log('Forensic summary generated.', 'log-ok');
-    window._lastSummary = text;
-    window._lastResults = r;
-  } catch(err) {
-    $('ai-summary-body').innerHTML = `<div style="padding:1rem;color:var(--muted);font-size:13px;">⚠ AI summary unavailable. Check API connection.</div>`;
-    log('AI summary error: ' + err.message, 'log-err');
-  }
-}
-
-function copyReport() {
-  if (window._lastSummary) {
-    navigator.clipboard.writeText(window._lastSummary).then(() => log('Summary copied to clipboard.', 'log-ok'));
-  }
-}
-
-function downloadReport(r) {
-  const summary = window._lastSummary || 'No AI summary available.';
-  const report = `DeepGuard Forensic Report
-========================
-Generated: ${new Date().toISOString()}
-Media Type: ${r.type.toUpperCase()}
-Detection Model: ${r.model}
-
-VERDICT: ${r.verdict}
-Deepfake Probability: ${r.score}%
-
-SIGNAL BREAKDOWN:
-${r.signals.map(s => `  - ${s.name}: ${s.conf}% (${s.desc})`).join('\n')}
-
-AI FORENSIC SUMMARY:
-${summary}
-
----
-DeepGuard v2.1.0 · IdeaTeX Heritage Hackathon · May 2026
-`;
-
-  const blob = new Blob([report], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `deepguard-report-${Date.now()}.txt`;
-  a.click(); URL.revokeObjectURL(url);
-  log('Report downloaded.', 'log-ok');
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 </script>
+
 </body>
 </html>
