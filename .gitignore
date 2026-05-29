@@ -1,0 +1,14 @@
+venv/ 
+weights/ 
+*.pth 
+*.dll 
+logs/ 
+__pycache__/ 
+mnt/ 
+*.pyc 
+write_ufd.py 
+0.5 
+add_dire.py 
+fix_dire.py 
+fix_strategy.py 
+main.py 

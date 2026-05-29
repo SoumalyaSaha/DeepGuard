@@ -1,0 +1,70 @@
+version: "3.9"
+
+services:
+
+  # ── Frontend (Nginx + React SPA) ─────────────────────────────────────────────
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8888:80"
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - gateway
+
+  # ── FastAPI Gateway ───────────────────────────────────────────────────────────
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.gateway
+    ports:
+      - "8000:8000"
+    environment:
+      - NPR_URL=http://npr:5001/detect
+      - RAWNET_URL=http://rawnet:5002/detect
+      - CROSSVIT_URL=http://crossvit:7001/detect
+    depends_on:
+      - npr
+      - rawnet
+      - crossvit
+
+  # ── NPR Image Model ───────────────────────────────────────────────────────────
+  npr:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+      args:
+        MODEL_DIR: models/npr
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./weights:/app/weights:ro
+    command: uvicorn main:app --host 0.0.0.0 --port 5001
+
+  
+  # ── RawNet2 Audio Model ────────────────────────────────────────────────────────
+  rawnet:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+      args:
+        MODEL_DIR: models/rawnet
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./weights:/app/weights:ro
+    command: uvicorn main:app --host 0.0.0.0 --port 5002
+
+  # ── CrossEfficientViT Video Model ────────────────────────────────────────────
+  crossvit:
+    build:
+      context: .
+      dockerfile: Dockerfile.model
+      args:
+        MODEL_DIR: models/crossvit
+    ports:
+      - "7001:7001"
+    volumes:
+      - ./weights:/app/weights:ro
+    command: uvicorn main:app --host 0.0.0.0 --port 7001
